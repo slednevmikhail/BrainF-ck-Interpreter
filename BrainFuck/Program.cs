@@ -2,20 +2,17 @@
 
 namespace Brainfuck
 {
-    public class Program
+    public class Program : Interpreter
     {
         static void Main()
         {
-            Pointer.GetStartPosition();
-            Console.ReadLine().Parse();
-            for (Interpreter.currentIndex = 0; Interpreter.currentIndex < Parser.ParsedCode.Length; Interpreter.currentIndex++)
+            Code = Console.ReadLine();
+            for (CurrentIndex = 0; CurrentIndex < Code.Length; CurrentIndex++)
             {
-                var currentSymbol = Parser.ParsedCode[Interpreter.currentIndex];
-                Interpreter.DoSymbolAction(currentSymbol);
+                DoCommand(Code[CurrentIndex]);
             }
             for (int i = 0; i < 11; i++)
-                Console.Write(" [{0}] ", Memory.mainMemory[i]);
+                Console.Write("[{0}] ", Memory[i]);
         }
     }
-
 }

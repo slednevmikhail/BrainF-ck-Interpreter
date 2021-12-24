@@ -4,52 +4,66 @@ namespace Brainfuck
 {
     public class Interpreter
     {
-        public static int currentIndex = 0;
-        public static void DoSymbolAction(char symbol)
+        public static string Code;
+        public static int[] Memory = new int[100];
+        public static int CurrentIndex;
+        public static int PointerPos;
+        public static void DoCommand(char symbol)
         {
-            if (symbol == '>') Pointer.MoveRight();
-            else if (symbol == '<') Pointer.MoveLeft();
-            else if (symbol == '[')
+            switch (symbol)
             {
-                if (Memory.mainMemory[Pointer.position] == 0)
-                    Loop.GoToNextBrackets();
+                case '>':
+                    PointerPos += 1;
+                    break;
+                case '<':
+                    PointerPos -= 1;
+                    break;
+                case '[':
+                    if (Memory[PointerPos] == 0)
+                        Loop.GoToBracket();
+                    break;
+                case ']':
+                    if (Memory[PointerPos] != 0)
+                    {
+                        Loop.GoToBracket();
+                        CurrentIndex -= 1;
+                    }
+                    break;
+                case '+':
+                    Memory[PointerPos] += 1;
+                    break;
+                case '-':
+                    Memory[PointerPos] -= 1;
+                    break;
+                case ',':
+                    Memory[PointerPos] += int.Parse(Console.ReadLine());
+                    break;
+                case '.':
+                    Console.WriteLine(Memory[PointerPos]);
+                    break;
             }
-            else if (symbol == ']')
-            {
-                if (Memory.mainMemory[Pointer.position] != 0)
-                    Loop.GoToNextBrackets();
-            }
-            else if (symbol == '+')
-                Memory.mainMemory[Pointer.position] += 1;
-            else if (symbol == '-')
-                Memory.mainMemory[Pointer.position] -= 1;
-            else if (symbol == ',')
-                Memory.mainMemory[Pointer.position] += int.Parse(Console.ReadLine());
-            else if (symbol == '.')
-                Console.WriteLine(Memory.mainMemory[Pointer.position]);
         }
     }
-    public static class Loop
+
+    public class Loop: Interpreter
     {
-        private static int openedBrackets;
-        private static int closedBrackets;
-        public static void GoToNextBrackets()
+        private static int bracketsTracker;
+        public static void GoToBracket()
         {
-            CountBrackets();
-            while (openedBrackets != closedBrackets)
+            TrackBrackets();
+            while (bracketsTracker != 0)
             {
-                if (openedBrackets > closedBrackets) Interpreter.currentIndex += 1;
-                if (openedBrackets < closedBrackets) Interpreter.currentIndex -= 1;
-                CountBrackets();
+                if (bracketsTracker < 0) CurrentIndex += 1;
+                    else CurrentIndex -= 1;
+                TrackBrackets();
             }
-            if (Parser.ParsedCode[Interpreter.currentIndex] == '[') Interpreter.currentIndex -= 1;
         }
-        public static void CountBrackets()
+        public static void TrackBrackets()
         {
-            if (Parser.ParsedCode[Interpreter.currentIndex] == ']')
-                closedBrackets += 1;
-            if (Parser.ParsedCode[Interpreter.currentIndex] == '[')
-                openedBrackets += 1;
+            if (Code[CurrentIndex] == ']')
+                bracketsTracker += 1;
+            if (Code[CurrentIndex] == '[')
+                bracketsTracker -= 1;
         }
 
     }
