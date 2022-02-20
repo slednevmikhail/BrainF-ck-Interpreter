@@ -8,6 +8,12 @@ namespace Brainfuck
         public static int[] Memory = new int[100];
         public static int CurrentIndex;
         public static int PointerPos;
+        public static OpeningBracket Bracket;
+        public class OpeningBracket
+        {
+            public OpeningBracket PreviousBracket;
+            public int BracketIndex;
+        }
         public static void DoCommand(char symbol)
         {
             switch (symbol)
@@ -19,15 +25,15 @@ namespace Brainfuck
                     PointerPos -= 1;
                     break;
                 case '[':
-                    if (Memory[PointerPos] == 0)
-                        Loop.GoToBracket();
+                    if (Memory[PointerPos] != 0)
+                        Bracket = new OpeningBracket { BracketIndex = CurrentIndex, PreviousBracket = Bracket };
                     break;
                 case ']':
                     if (Memory[PointerPos] != 0)
                     {
-                        Loop.GoToBracket();
-                        CurrentIndex -= 1;
+                        CurrentIndex = Bracket.BracketIndex;
                     }
+                    else Bracket = Bracket.PreviousBracket;
                     break;
                 case '+':
                     Memory[PointerPos] += 1;
@@ -44,28 +50,4 @@ namespace Brainfuck
             }
         }
     }
-
-    public class Loop: Interpreter
-    {
-        private static int bracketsTracker;
-        public static void GoToBracket()
-        {
-            TrackBrackets();
-            while (bracketsTracker != 0)
-            {
-                if (bracketsTracker < 0) CurrentIndex += 1;
-                    else CurrentIndex -= 1;
-                TrackBrackets();
-            }
-        }
-        public static void TrackBrackets()
-        {
-            if (Code[CurrentIndex] == ']')
-                bracketsTracker += 1;
-            if (Code[CurrentIndex] == '[')
-                bracketsTracker -= 1;
-        }
-
-    }
-
 }
